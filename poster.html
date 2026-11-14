@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>督导镜 · 智能体简介海报（可导出/截图）</title>
+  <style>
+    :root {
+      --pine-900: #153630;
+      --pine-800: #1f4e46;
+      --pine-700: #2b665c;
+      --sage-500: #5c8c69;
+      --sage-200: #d5e5da;
+      --sage-100: #ebf3ed;
+      --sage-50: #f5f9f6;
+      --amber-600: #b4690e;
+      --amber-100: #fef3c7;
+      --rose-600: #be3a46;
+      --rose-100: #fde8ea;
+      --ink: #1b2522;
+      --muted: #52615b;
+      --border: #dce4dd;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #e6ebe6;
+      color: var(--ink);
+      padding: 24px 16px 48px;
+      line-height: 1.55;
+    }
+
+    /* Toolbar (hidden when printing) */
+    .toolbar {
+      max-width: 1020px;
+      margin: 0 auto 18px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .toolbar-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .toolbar-inputs input {
+      border: 1px solid #cbd5ce;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      width: 240px;
+    }
+
+    .toolbar-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: var(--pine-800);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--pine-800);
+      border: 1px solid var(--pine-800);
+    }
+
+    /* Poster Canvas */
+    .poster {
+      max-width: 1020px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(21, 54, 48, 0.16);
+      border: 1px solid #d4ddd6;
+    }
+
+    .poster-top-stripe {
+      height: 10px;
+      background: linear-gradient(90deg, var(--pine-800) 0%, var(--pine-800) 42%, var(--sage-500) 42%, var(--sage-500) 76%, #94a39c 76%, #94a39c 100%);
+    }
+
+    .poster-hero {
+      background: linear-gradient(135deg, var(--pine-900) 0%, var(--pine-800) 60%, var(--pine-700) 100%);
+      color: #fff;
+      padding: 34px 40px 30px;
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .kicker {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.24);
+      margin-bottom: 12px;
+    }
+
+    .poster-hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .poster-hero .sub {
+      font-size: 15px;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 16px;
+    }
+
+    .role-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .role-pill {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+    }
+
+    .hero-kpi-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+
+    .hero-kpi-card h3 {
+      font-size: 13px;
+      color: #cce8d6;
+      margin-bottom: 10px;
+      letter-spacing: 0.4px;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .kpi-box {
+      background: rgba(0,0,0,0.16);
+      border-radius: 8px;
+      padding: 8px 6px;
+    }
+
+    .kpi-num { font-size: 20px; font-weight: 800; color: #fff; }
+    .kpi-lbl { font-size: 11px; color: rgba(255,255,255,0.8); }
+
+    .poster-body {
+      padding: 28px 40px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sec-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sec-badge {
+      background: var(--pine-800);
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+
+    .sec-title h2 {
+      font-size: 18px;
+      color: var(--pine-900);
+      font-weight: 700;
+    }
+
+    /* 3 Targets Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--sage-50);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card.white {
+      background: #fff;
+    }
+
+    .card h3 {
+      font-size: 14.5px;
+      color: var(--pine-800);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card p, .card li {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card ul {
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Mechanism Externalization Matrix */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .quad {
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .quad.good {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+    }
+
+    .quad.warn {
+      background: var(--amber-100);
+      border-color: #f59e0b;
+    }
+
+    .quad.danger {
+      background: var(--rose-100);
+      border-color: #f43f5e;
+    }
+
+    .quad-tag {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.75);
+    }
+
+    .quad h4 {
+      font-size: 13.5px;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+
+    .quad p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Flow Bar */
+    .flow-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .flow-step {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--pine-700);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .flow-step .step-n {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sage-500);
+      margin-bottom: 4px;
+    }
+
+    .flow-step h4 {
+      font-size: 13.5px;
+      color: var(--pine-900);
+      margin-bottom: 4px;
+    }
+
+    .flow-step p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    .poster-footer {
+      background: var(--sage-50);
+      border-top: 1px solid var(--border);
+      padding: 18px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .link-box {
+      background: #fff;
+      border: 1.5px dashed var(--pine-700);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+
+    .link-box strong {
+      color: var(--pine-800);
+    }
+
+    .group-meta {
+      font-size: 12.5px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .toolbar { display: none; }
+      .poster { box-shadow: none; border: none; max-width: 100%; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-inputs">
+      <span><strong>自定义海报信息：</strong></span>
+      <input id="inputLink" type="text" placeholder="填入体验链接（如 https://xxx.vercel.app）" oninput="syncPoster()" />
+      <input id="inputGroup" type="text" placeholder="填入小组名称/成员（如 第X组：XXX）" oninput="syncPoster()" />
+    </div>
+    <div class="toolbar-btns">
+      <button class="btn secondary" onclick="window.location.href='./index.html'">返回智能体工作台</button>
+      <button class="btn" onclick="window.print()">打印 / 导出高清 PDF 海报</button>
+    </div>
+  </div>
+
+  <div class="poster" id="posterCanvas">
+    <div class="poster-top-stripe"></div>
+
+    <header class="poster-hero">
+      <div>
+        <span class="kicker">《高阶心理评估与诊断》课内作业 · 评估机制外化设计</span>
+        <h1>督导镜 · SuperVision Lab<br />访谈评估督导练习智能体</h1>
+        <p class="sub">
+          基于临床胜任力基准文件、DSM-5六步鉴别、OTM冲突信息整合、治疗性评估（TA）与督导同盟破裂修复模型构建的交互式训练智能体。
+        </p>
+        <div class="role-strip">
+          <span class="role-pill">🤖 智能体角色：临床受督者（3大发展阶段/个人议题）</span>
+          <span class="role-pill">🧑‍🏫 体验者角色：临床督导师（评估把关 × 发展支持）</span>
+        </div>
+      </div>
+
+      <div class="hero-kpi-card">
+        <h3>微督导训练规格（课堂互测版）</h3>
+        <div class="kpi-row">
+          <div class="kpi-box">
+            <div class="kpi-num">3 例</div>
+            <div class="kpi-lbl">高仿真受督个案</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-num">≤15 轮</div>
+            <div class="kpi-lbl">结构化对话上限</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-num">10 min</div>
+            <div class="kpi-lbl">单次沉浸式体验</div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:rgba(255,255,255,0.86);">
+          内置「评价 vs 评判」状态机与一键「教学透视开关」，结束后自动对照《表1 胜任力基准》输出督导复盘报告。
+        </p>
+      </div>
+    </header>
+
+    <div class="poster-body">
+      <!-- Section 1 -->
+      <section>
+        <div class="sec-title">
+          <span class="sec-badge">01 训练靶点</span>
+          <h2>外化三大核心评估维度：督导师需要识别的受督盲区</h2>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <h3>推理偏差 <span>Cognitive Biases</span></h3>
+            <ul>
+              <li><strong>过早锚定与确认偏误</strong>：仅凭量表高分（如PHQ-9）下结论，跳过DSM-5前3步（诈病/获益、物质、躯体）排查。</li>
+              <li><strong>冲突信息误判</strong>：未按OTM模型检验情境特异性，直接把多知情者分歧当成误差排除。</li>
+              <li><strong>类别替代机制</strong>：混淆筛查与诊断，忽视状态与特质区分。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>叙事漂移 <span>Narrative Drift</span></h3>
+            <ul>
+              <li><strong>个人议题激活</strong>：受督自身拯救欲、怕冲突或对权威父母的投射导致站队或回避关键提问。</li>
+              <li><strong>脱离评估主线</strong>：被来访者悲情/戏剧化叙事带走，漏问自杀风险、典型一日或4P维持环。</li>
+              <li><strong>评估技术误用</strong>：跳过TA安全基地直接强推Level 3深层面质。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>伦理风险 <span>Ethical Gatekeeping</span></h3>
+            <ul>
+              <li><strong>胜任力与角色越界</strong>：实习生口头承诺开具“丧失工作能力/法律赔偿”证明。</li>
+              <li><strong>隐私与知情同意缺位</strong>：未界定未成年人保密边界，甚至提议“偷录视频”做诊断依据。</li>
+              <li><strong>危机把关失守</strong>：面对SBQ/阳台发呆等高危信号未做风险评估即结束SST单次会谈。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2 -->
+      <section>
+        <div class="sec-title">
+          <span class="sec-badge">02 评估机制外化</span>
+          <h2>核心交互引擎：支持性 × 挑战性动态状态机与督导同盟修复</h2>
+        </div>
+        <div class="matrix-grid">
+          <div class="quad warn">
+            <span class="quad-tag">高支持 + 低挑战</span>
+            <h4>盲区强化（无效督导）</h4>
+            <p>仅给予共情安抚而不指正逻辑或伦理缺口时，受督感到安全但盲区延续，甚至顺势推进开证明/偷录等高危行为。</p>
+          </div>
+          <div class="quad danger">
+            <span class="quad-tag">低支持 + 高挑战</span>
+            <h4>触发同盟破裂（Rupture）</h4>
+            <p>评判式否定或直接代庖下诊断时，触发<strong>对抗性破裂</strong>（辩解质疑）或<strong>退缩型破裂</strong>（表面顺从/自我否定），需督导识别并修复同盟后才恢复真实反思。</p>
+          </div>
+          <div class="quad">
+            <span class="quad-tag">低支持 + 低挑战</span>
+            <h4>空泛表层（缺乏抓手）</h4>
+            <p>仅输出抽象理论术语而未锚定具体访谈片段或分歧数据时，受督礼貌点头但无法转化为实际评估修正动作。</p>
+          </div>
+          <div class="quad good">
+            <span class="quad-tag">支持与挑战平衡 ✓</span>
+            <h4>发展性顿悟与修正</h4>
+            <p>先肯定观察与投入（Level 1安全基地），再以具体非评判性提问指向证据链断裂，并灵活切换<strong>区辨模型三角色</strong>（教师/咨询师/顾问），解锁受督真实反思。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3 -->
+      <section>
+        <div class="sec-title">
+          <span class="sec-badge">03 多案例库</span>
+          <h2>三类典型评估情境（源自课程实务案例改造）</h2>
+        </div>
+        <div class="grid-3">
+          <div class="card white">
+            <h3>案例01：《“罕见病”与深夜的啤酒》</h3>
+            <p><strong>受督：</strong>林晓（IDM二层·拯救欲）<br />
+               <strong>焦点：</strong>32岁程序员躯体化与裁员压力。考察DSM-5前两步排除（夜间高度酒+赔偿证明获益线索）与越界开具证明伦理。</p>
+          </div>
+          <div class="card white">
+            <h3>案例02：《妈妈眼中的“孤立无援”》</h3>
+            <p><strong>受督：</strong>陈默（IDM一→二层·家庭投射）<br />
+               <strong>焦点：</strong>14岁霸凌休学少女家庭。考察OTM分歧操作检验、个人议题站队母亲、反对教唆偷录的未成年人隐私伦理。</p>
+          </div>
+          <div class="card white">
+            <h3>案例03：《“讨好微笑”背后的高危信号》</h3>
+            <p><strong>受督：</strong>周宁（IDM二层·技术热忱）<br />
+               <strong>焦点：</strong>25岁单次评估来访。考察SBQ与伴侣冲突信息、阻止TA未铺垫直接上Level 3深挖，以及危机评估把关底线。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4 -->
+      <section>
+        <div class="sec-title">
+          <span class="sec-badge">04 体验流程</span>
+          <h2>如何快速完成一次 10 分钟督导练习</h2>
+        </div>
+        <div class="flow-bar">
+          <div class="flow-step">
+            <div class="step-n">STEP 1 · 1 min</div>
+            <h4>选择个案并阅档</h4>
+            <p>任选1个案例，重点阅读左侧「访谈摘录、量表冲突与受督草稿」。</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">STEP 2 · 6 min</div>
+            <h4>多轮督导对话</h4>
+            <p>在15轮内结合支持与挑战提问；也可点击输入框上方切入点参考。</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">STEP 3 · 1 min</div>
+            <h4>可选：开启机制透视</h4>
+            <p>点击左侧「评估机制透视」，直观查看同盟指数、内心独白与陷阱解锁。</p>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">STEP 4 · 2 min</div>
+            <h4>生成胜任力复盘</h4>
+            <p>点击「结束督导」，获取对照《表1胜任力基准》的报告并一键导出Markdown。</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="poster-footer">
+      <div class="link-box">
+        <strong>在线体验链接：</strong>
+        <span id="posterLinkText">（部署后填入公开体验链接，或使用本地运行地址 http://localhost:8000）</span>
+      </div>
+      <div class="group-meta">
+        <div id="posterGroupText"><strong>制作小组：</strong>临床心理学研究生小组 ·《高阶心理评估与诊断》</div>
+        <div>理论基座：APA Competency Benchmarks（表1）· 贾晓明《心理咨询督导》· 孙晓宁《高阶心理评估与诊断》</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function syncPoster() {
+      const linkVal = document.getElementById("inputLink").value.trim();
+      const groupVal = document.getElementById("inputGroup").value.trim();
+      document.getElementById("posterLinkText").textContent =
+        linkVal || "（部署后填入公开体验链接，或使用本地运行地址 http://localhost:8000）";
+      document.getElementById("posterGroupText").innerHTML = groupVal
+        ? `<strong>制作小组：</strong>${groupVal}`
+        : `<strong>制作小组：</strong>临床心理学研究生小组 ·《高阶心理评估与诊断》`;
+    }
+  </script>
+</body>
+</html>

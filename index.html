@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>督导镜 · 访谈评估督导练习智能体</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">SV</div>
+      <div>
+        <div class="brand-title">督导镜 · SuperVision Lab</div>
+        <div class="brand-sub">高阶心理评估与诊断 · 访谈评估督导练习智能体（受督 AI × 督导者训练）</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="backLobbyBtn" class="pill-btn" style="display:none;" onclick="App.backToLobby()">← 切换案例</button>
+      <a class="pill-btn" href="./poster.html" target="_blank">查看课程简介海报</a>
+      <button id="modeBtn" class="pill-btn" onclick="App.openSettings()">
+        <span id="statusDot" class="status-dot demo"></span>
+        <span id="modeLabel">检测连接中…</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Lobby View -->
+  <main id="lobbyView" class="lobby-container">
+    <section class="hero-banner">
+      <div>
+        <span class="hero-tag">评估机制外化 × 胜任力基准（Table 1）× 15轮/10分钟微督导</span>
+        <h1>练习识别受督评估盲区，给出支持与挑战平衡的督导反馈</h1>
+        <p>
+          在本系统中，<strong>AI 扮演不同发展阶段的临床受督者</strong>，呈现真实访谈摘录、量表结果与带有隐藏偏差的初步概念化；
+          <strong>你扮演临床督导师</strong>，通过 10 分钟（建议 15 轮内）的对话，引导受督识别<strong>推理偏差、叙事漂移与伦理风险</strong>，并在结束时获得对照《胜任力基准文件》的督导复盘报告。
+        </p>
+        <div class="hero-badges">
+          <span class="hero-badge">DSM-5 六步鉴别诊断</span>
+          <span class="hero-badge">OTM 冲突信息整合</span>
+          <span class="hero-badge">治疗性评估 TA &amp; 单次 SST</span>
+          <span class="hero-badge">IDM &amp; 区辨模型</span>
+          <span class="hero-badge">同盟破裂与修复</span>
+        </div>
+      </div>
+      <div class="hero-guide-box">
+        <h3>10 分钟体验指南（建议 8–15 轮）</h3>
+        <ol>
+          <li><strong>选定受督个案</strong>：从下方 3 个典型评估情境中任选 1 例进入督导室。</li>
+          <li><strong>审阅左侧档案</strong>：留意访谈细节、多源量表冲突与受督草稿中的隐含风险。</li>
+          <li><strong>平衡支持与挑战</strong>：一味指责会触发受督防御/退缩破裂；一味安慰会强化盲区。</li>
+          <li><strong>生成复盘报告</strong>：随时点击右上角「结束督导」，解锁隐藏陷阱清单与胜任力评估。</li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="section-header">
+      <h2>选择受督呈报个案（多案例可选）</h2>
+      <span>建议每组体验 1–2 个案例，约 10 分钟/案</span>
+    </div>
+    <section id="caseGrid" class="case-grid"></section>
+  </main>
+
+  <!-- Workspace View -->
+  <main id="workspaceView" class="workspace">
+    <!-- Left Dossier -->
+    <aside class="dossier-panel">
+      <div class="dossier-tabs">
+        <button id="tabDossier" class="tab-btn active" onclick="App.switchLeftTab('dossier')">📋 受督呈报档案</button>
+        <button id="tabTelemetry" class="tab-btn" onclick="App.switchLeftTab('telemetry')">🔍 评估机制透视</button>
+      </div>
+      <div id="dossierContent" class="dossier-content"></div>
+      <div id="telemetryContent" class="dossier-content" style="display:none;"></div>
+    </aside>
+
+    <!-- Right Chat -->
+    <section class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <h3 id="activeCaseTitle">案例标题</h3>
+          <p id="activeCaseMeta">受督角色信息</p>
+        </div>
+        <div class="session-controls">
+          <span id="turnCounter" class="turn-pill">轮次 0 / 15</span>
+          <span id="timerDisplay" class="timer-pill">10:00</span>
+          <button id="finishBtn" class="finish-btn" onclick="App.finishAndEvaluate()">结束督导 · 生成复盘</button>
+        </div>
+      </div>
+
+      <div id="chatMessages" class="chat-messages"></div>
+
+      <div class="scaffold-bar" id="scaffoldBar">
+        <span class="scaffold-label">督导切入点参考：</span>
+      </div>
+
+      <div class="composer">
+        <textarea id="userInput" placeholder="输入你的督导回应（建议兼顾共情支持与具体非评判提问；Enter 发送，Shift+Enter 换行）"></textarea>
+        <button id="sendBtn" class="send-btn" onclick="App.sendMessage()">发送</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal-card narrow">
+      <div class="modal-header">
+        <h3>模型连接与 API 设置</h3>
+        <button class="close-btn" onclick="App.closeSettings()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>运行模式</label>
+          <select id="settingMode" onchange="App.onModeSelectChange()">
+            <option value="proxy">自动代理模式（推荐：使用已部署服务端 Gemini API，体验者免填 Key）</option>
+            <option value="direct">浏览器直连 Gemini API（填入个人 Gemini API Key）</option>
+            <option value="offline">离线高仿真状态机模式（无需联网与 Key，适合断网兜底演示）</option>
+          </select>
+          <div id="proxyHealthHint" class="form-hint">正在检测服务端代理可用性…</div>
+        </div>
+
+        <div id="directFields" style="display:none;">
+          <div class="form-group">
+            <label>Gemini API Key</label>
+            <input type="password" id="settingApiKey" placeholder="AIza..." />
+            <div class="form-hint">仅保存在你当前浏览器的本地存储（localStorage），不会上传到其他第三方。</div>
+          </div>
+          <div class="form-group">
+            <label>Gemini API Base URL（可选，用于自定义中转/反代）</label>
+            <input type="text" id="settingBaseUrl" placeholder="https://generativelanguage.googleapis.com" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Gemini 模型版本</label>
+          <select id="settingModel">
+            <option value="gemini-2.5-flash">gemini-2.5-flash（推荐：响应快、适合15轮实时对话）</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro（更深临床推理，响应略慢）</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="App.closeSettings()">取消</button>
+        <button class="primary-btn" style="width:auto;" onclick="App.saveSettings()">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evaluation Report Modal -->
+  <div id="reportModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>督导胜任力评估与复盘报告</h3>
+        <button class="close-btn" onclick="App.closeReport()">&times;</button>
+      </div>
+      <div id="reportBody" class="modal-body"></div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="App.copyReportMarkdown()">复制 Markdown（用于课后反思作业）</button>
+        <button class="secondary-btn" onclick="window.print()">打印 / 存为 PDF</button>
+        <button class="primary-btn" style="width:auto;" onclick="App.closeReport()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./cases.js"></script>
+  <script src="./prompts.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
