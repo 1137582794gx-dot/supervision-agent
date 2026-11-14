@@ -34,6 +34,14 @@ export default async (req) => {
     const baseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/+$/, "");
     const url = `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
+    const baseGenConfig = body.generationConfig || { temperature: 0.7 };
+    const generationConfig = {
+      ...baseGenConfig,
+      ...(model.includes("gemini-3.8-flash") && !baseGenConfig.thinkingConfig
+        ? { thinkingConfig: { thinkingLevel: "LOW", includeThoughts: false } }
+        : {})
+    };
+
     const upstream = await fetch(url, {
       method: "POST",
       headers: {
@@ -43,11 +51,19 @@ export default async (req) => {
       body: JSON.stringify({
         systemInstruction: body.systemInstruction,
         contents: body.contents || [],
-        generationConfig: body.generationConfig || { temperature: 0.7 }
-      })
+        generationConfig
+      }),
+      signal: AbortSignal.timeout(9200)
     });
 
-    const data = await upstream.json();
+    const rawText = await upstream.text();
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (_) {
+      data = { error: { message: rawText || `上游返回非 JSON 响应 (HTTP ${upstream.status})` } };
+    }
+
     if (!upstream.ok) {
       return new Response(JSON.stringify({ error: data?.error?.message || `HTTP ${upstream.status}` }), {
         status: upstream.status,
@@ -55,16 +71,22 @@ export default async (req) => {
       });
     }
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const textPart = parts.find((p) => !p.thought && typeof p.text === "string") || parts[0];
+    const text = textPart?.text || "";
     return new Response(JSON.stringify({ text }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message || "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
+    const isTimeout = err?.name === "TimeoutError" || err?.name === "AbortError";
+    return new Response(
+      JSON.stringify({ error: isTimeout ? "Gemini 响应超过 9 秒触发平台超时保护，请再发一次或点重试" : (err.message || "Internal Server Error") }),
+      {
+        status: isTimeout ? 504 : 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
   }
 };
 
