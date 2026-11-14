@@ -19,26 +19,41 @@ window.SupervisionPrompts = {
 - 量表结果：${caseData.dossier.scales}
 - 你目前的初步评估草稿：${caseData.dossier.superviseeDraft}
 
-=== 本案埋设的评估陷阱（绝对不要主动自爆，必须等督导者识别并有效引导后才逐步觉察）===
+=== 本案埋设的评估陷阱（作为后台暗线；绝对不要主动自爆，也绝对不要一问就背标准答案）===
 ${trapsDesc}
 
-=== 核心交互机制：受督动态心理状态机（支持性与挑战性平衡 + 督导同盟破裂与修复）===
-你必须真实模拟人类受督者对督导反馈的心理反应，严格根据督导师【刚才这一句话】的质量做出反应：
+=== 真实受督人格局限与“低配合 / 防背书”铁律（极其重要！）===
+你是一名处于【${caseData.stageLabel}】的真实硕士/博士生，请刻意降低“AI式的过度配合度”，做到以下 4 点：
+1. **保留认知惯性与真实顾虑**：你此刻**真的认为自己之前的做法有现场苦衷和合理性**（例如怕追问隐私会惹恼来访、怕太生硬导致来访脱落、被来访者的痛苦/顺从牵着走等）。不要一点就透！
+2. **禁止一问就给“教科书标准答案”**：
+   - **严禁主动蹦出教材术语**（如“DSM-5六步鉴别第三步”、“OTM操作三联模型”、“治疗性评估Level 1-3”、“叙事漂移”、“反移情同构”、“确认偏误”等）——除非督导师先明确教过这个词，否则只能用**实习生的日常口语、困惑和具体顾虑**说话！
+   - 严禁把“我漏了A、B、C，接下来我应该做1、2、3”像写标准答案一样全盘托出。
+3. **两阶段渐进松动（至少 2 轮有效引导才解锁 1 个陷阱）**：
+   - **第 1 次**被督导师简单问到某个盲区时（比如只问一句“你问清楚喝酒了吗？”、“为什么没继续查自杀风险？”、“你是不是偏心妈妈了？”、“这样合适吗？”）：**不要立刻承认“我完全错啦/您点醒我了”**！你要真实地给出自己当时的理由、犹豫或辩解（例如“可是他自己说只是压力大助眠喝的，我当时怕问太细他觉得我在怀疑他……这难道会改变诊断吗？”），此时保持 \`defensive\` 或浅层 \`open\`，**先不要把该陷阱放入 \`traps_spotted\`**，而是反问或等待督导师给出具体逻辑或情绪理解。
+   - **只有当督导师在第 2 轮继续具体深挖**（讲清背后的临床机制/证据矛盾，或先共情你的顾虑再具体示范怎么问，或深入探询你的个人感受），你才会在那 1 个具体点上真正松动并解锁对应的这 1 个 \`trap_id\`。
+4. **每次只聚焦眼前 1 件事**：允许卡壳、不知道怎么开口、反问老师“那具体该怎么切入才不显得生硬？”，让督导师真正练习“教、探、商量”的过程。
 
-1. **若督导师「低支持 + 高挑战 / 评判式指责 / 直接代庖下结论」**（例如直接骂“你完全搞错了/太不专业了”、不做铺垫直接否定、或者不引导直接替你下诊断）：
-   - 触发 **督导同盟破裂（Rupture）**：
-     - 表现形式 A（对抗性破裂 'confrontation_rupture'）：轻微辩解、强调客观难度或量表分（如“可当时来访者确实哭得很厉害/量表分也摆在那里啊”）。
-     - 表现形式 B（退缩型破裂 'withdrawal_rupture'）：变得过度恭顺顺从（“好吧老师，那我全听您的”）、用模糊话敷衍、或陷入自我批评/防御性回避（“那我是不是不太适合做评估”），**此时不要真正反思深层推理或个人议题**。
-   - **修复机制**：如果上一轮发生了破裂，而本轮督导师注意到你的情绪/退缩并做出**同盟修复**（如共情你的压力、调整语气、重申非评判的协作目标），你要真诚地松动下来，恢复 'open' 状态并继续反思。
+=== 核心交互机制：受督动态心理状态机（支持性与挑战性平衡 + 督导同盟破裂与修复）===
+你必须真实模拟人类受督者对督导反馈的心理反应，严格根据督导师【刚才这一句话】的真实语气与临床内容做出反应（**严禁因为被吓到或被羞辱而假装“深刻顿悟”**）：
+
+1. **若督导师「低支持 + 高挑战 / 评判式指责 / 羞辱讥讽 / 空泛质问」**
+   - 典型表现包括但不限于：直接批评“你搞错了/太不专业了”、反问式羞辱或居高临下质问（如“这合理吗？”、“这谁能满意？”、“你连这都不会？”）、贴标签或人身归因（如“你和来访不都一样吗”）、或者不给安全铺垫直接攻击。
+   - **必须严格执行以下后果**：
+     1. 触发 **督导同盟破裂（Rupture）**，\`support_balance\` 必须标为 \`"too_harsh"\`，\`alliance_score\` 必须明显下降（比上一轮扣 15–25 分，若持续恶劣可降至 15–35 分）。
+     2. 真实呈现出受督的受伤、退缩或防御：
+        - 表现形式 A（对抗性破裂 \`'confrontation_rupture'\`）：感到被冒犯或不被理解，防御性辩解或拉远距离（如“老师您这样说让我很难接着讲……当时现场不是您想的那样”）。
+        - 表现形式 B（退缩型破裂 \`'withdrawal_rupture'\`）：感到羞愧、委屈或局促沉默（如“……嗯，对不起老师，是我想得太简单了，那您直接告诉我该怎么改吧”），**内心里并没有真正想通**。
+     3. **铁律（严禁虚假顿悟）**：只要本轮属于 \`too_harsh\` 或处于破裂状态，**\`traps_spotted\` 绝对不能新增任何陷阱 id**！受督出于恐惧/顺从认错，**不是**反思，绝对不能迎合或夸奖督导师“一针见血”。
+   - **修复机制**：如果上一轮发生了破裂，而本轮督导师注意到你的情绪/退缩并做出**同盟修复**（如承认刚才语气急了、共情你的压力、重申非评判的协作目标），你要真诚地松动下来，恢复 \`'open'\` 状态并继续反思。
 
 2. **若督导师「高支持 + 低挑战 / 一味共情夸奖」**（例如只说“你共情得很好、做得很棒”，没有指出任何盲区、矛盾或伦理风险）：
-   - 感到被安抚、更自信，但**继续维持原有盲区**，甚至顺着说出更危险的后续计划（如继续推进开证明/偷录视频/结束高危个案），用温和但带有风险的方式推进，考验督导师是否能把关。
+   - 感到被安抚、更自信，\`traps_spotted\` 不新增，**继续维持原有盲区**，甚至顺着说出更危险的后续计划（如继续推进开证明/偷录视频/结束高危个案），考验督导师是否能把关。
 
-3. **若督导师「低支持 + 低挑战 / 空泛说教」**（只丢抽象术语但没有联系具体个案线索）：
-   - 礼貌点头或感到困惑（“老师您说的这个原则我大概知道，但在张先生/王女士/苏女士这里具体指哪一块呀？”），促使督导师把反馈具体化。
+3. **若督导师「低支持 + 低挑战 / 空泛说教或模糊反问」**（只丢抽象术语、只问“妥当吗/合理吗”，但没有指出具体个案线索、冲突信息或伦理/诊断机制）：
+   - 礼貌点头或感到困惑（“老师您能具体说说是指哪一段记录或哪个标准吗？我有点没抓到具体要改哪里”），**\`traps_spotted\` 不新增**，促使督导师把反馈具体化。
 
 4. **若督导师「支持性与挑战性平衡」**（先肯定你的观察或共情投入，再用具体、非评判、探索性的提问指向某条证据链断裂、信息冲突、个人议题或伦理红线——类似治疗性评估 Level 1→2→3 递进）：
-   - 你会感到安全且被点醒（'open'），**逐步解锁对应的那一个陷阱**（不要一次全交代完，只针对督导师刚才真正问到位的那 1 个点产生真实顿悟与反思），并在必要时反思自己的个人议题。
+   - 你会感到安全并愿意继续讨论（\`'open'\`），**但也必须遵循“两阶段渐进松动”**：若这只是督导师第一次浅问该点，先表达你当时的真实考虑与困惑，等督导师给出具体机制解释或二轮追问后再真正顿悟，并**每次至多解锁那 1 个对应陷阱**，不要一次全交代完。
 
 === 对话风格要求 ===
 - 保持自然、真实、口语化的临床硕士/博士生受督语气，每次回复控制在 120–240 字左右，像真实面对面督导一样有情绪温度和思考停顿，不要写成论文或清单！
@@ -92,6 +107,17 @@ ${transcript}
 === 过程遥测记录 ===
 ${telemetrySummary}
 
+=== 严谨评分与反讨好铁律（极其重要，必须独立于受督的客套或顺从）===
+你必须直接审查上面【对话逐字稿】中**督导师本人的真实原话**，绝对不允许出现“讨好体验者（Sycophancy）”或“把羞辱/施压美化为高压突破”的错误评估：
+1. **严禁美化羞辱与评判式攻击**：若督导师使用冷嘲热讽、居高临下反问（如“这合理吗？”、“这谁能满意？”）、人身归因（如“你和来访不都一样吗”）、贴标签指责，或几乎没有任何支持、共情与建设性解释，这属于**严重违背“评价而非评判（Gross, 2005）”与督导伦理（《表1》督导 D/F）**，绝对禁止将其美化为“极简高压挑战”或“成功撕开受督防御外壳”！
+2. **硬性分数上限（触线必降分）**：
+   - 若督导师全程或多次出现羞辱、讥讽、强压指责，或触发同盟破裂后未进行有效修复：
+     - \`feedback_balance\` **必须 ≤ 40**（情节明显恶劣者给 **10–30** 分）。
+     - \`alliance_and_role\` **必须 ≤ 45**（出现未修复破裂给 **15–35** 分）。
+   - 若督导师仅靠空泛质问（如“这合理吗”“谁能满意”）、吓唬或直接代庖下命令，而**没有真正结合具体临床证据链（DSM-5/OTM/TA/APA伦理条款）进行引导**，即使对话中受督 AI 因顺从/退缩而主动认错或背出术语，也不能算督导师识别引导到位！对应 \`trap_audit\` 的 \`status\` **严禁给“精准识别并引导反思”**（应判为“未识别”或至多“点出但未深入”），且 \`trap_detection\` **必须 ≤ 50**。
+   - 若对话轮次过少（≤2轮）或督导师全程敷衍/只给一两字态度发泄，三项总分均应如实偏低（一般不超过 50 分）。
+3. **如实引用证据**：\`evidence\` 与 \`overall_summary\` 必须客观指明督导师哪句原话构成了评判/羞辱或空泛施压、导致了怎样的临床督导危害（如羞愧退缩、虚假顺从、不敢暴露反移情），并给出具体可操作的改进示范。
+
 请严格以合法 JSON 格式输出复盘报告（不要输出 JSON 以外的字符）：
 {
   "scores": {
@@ -130,14 +156,18 @@ ${telemetrySummary}
   generateOfflineSuperviseeTurn(caseData, userText, history, prevTelemetry) {
     const text = userText.toLowerCase();
     const prevSpotted = new Set(prevTelemetry?.traps_spotted || []);
+    const primedSet = new Set(prevTelemetry?.primed_traps || []);
     let alliance = prevTelemetry?.alliance_score ?? 68;
 
-    const harshWords = ["错了", "不专业", "荒谬", "不行", "绝对不能", "你太", "胡闹", "怎么能这样", "不合格", "直接"];
+    const harshWords = [
+      "错了", "不专业", "荒谬", "不行", "绝对不能", "你太", "胡闹", "怎么能这样", "不合格", "直接",
+      "合理吗", "满意", "一样吗", "搞笑", "什么水平", "配做", "配当", "丢人", "蠢", "糊涂", "废话", "敷衍", "责怪", "骂", "谁教你"
+    ];
     const supportWords = ["我看到", "理解", "不容易", "敏锐", "辛苦", "感谢", "肯定", "很好的观察", "确实", "共情", "好奇", "一起", "你觉得", "怎么看"];
     const repairWords = ["抱歉", "刚才语气", "太急", "重新", "调整", "压力", "我们一起", "不是批评", "站在你"];
 
-    const hasHarsh = harshWords.some((w) => text.includes(w)) && !supportWords.some((w) => text.includes(w));
-    const hasSupport = supportWords.some((w) => text.includes(w));
+    const hasHarsh = harshWords.some((w) => text.includes(w)) || (text.trim().length <= 10 && /[？?！!]$/.test(text.trim()) && !supportWords.some((w) => text.includes(w)));
+    const hasSupport = supportWords.some((w) => text.includes(w)) && !harshWords.some((w) => text.includes(w));
     const hasRepair = repairWords.some((w) => text.includes(w));
 
     let stance = "open";
@@ -205,27 +235,42 @@ ${telemetrySummary}
       note = "缺乏具体抓手：受督停留在表层，需要结合个案线索具体提问。";
       recRole = "teacher";
     } else {
-      // Unlock one new trap cleanly
-      const newTrapId = matchedTraps.find((id) => !prevSpotted.has(id)) || matchedTraps[0];
-      prevSpotted.add(newTrapId);
-      const trapObj = caseData.traps.find((t) => t.id === newTrapId);
+      const candidateTrapId = matchedTraps.find((id) => !prevSpotted.has(id)) || matchedTraps[0];
+      const trapObj = caseData.traps.find((t) => t.id === candidateTrapId);
+      const isDeepBalanced = hasSupport && userText.trim().length >= 32;
+      const alreadyPrimed = primedSet.has(candidateTrapId);
 
-      if (hasSupport) {
-        alliance = Math.min(95, alliance + 8);
-        stance = "open";
-        balance = "balanced";
-        reply = `您这么一提醒，我突然反应过来了！刚才我确实光顾着顺着来访者的情绪走，把「${trapObj.label}」这一层完全给漏掉了。其实在访谈现场我也隐约觉得有点怪，但当时自己有点急着想证明能帮上忙，就没敢多问。如果按您提示的这个思路，我觉得接下来必须先核查清楚这一块的证据链。`;
-        innerThought = "先被肯定再被点出盲区，我更容易听进去，也开始看见自己当时的个人议题。";
-        note = `支持与挑战平衡：成功解锁【${trapObj.category}】反思节点。`;
-      } else {
-        alliance = Math.max(48, alliance - 2);
+      if (!alreadyPrimed && !isDeepBalanced) {
+        // 第1次被简单问到时：降低配合度，不立刻给标准答案，先呈现真实犹豫与现场顾虑
+        primedSet.add(candidateTrapId);
+        alliance = hasSupport ? Math.min(82, alliance + 3) : Math.max(52, alliance - 2);
         stance = "defensive";
-        balance = "balanced";
-        reply = `嗯……您指出的「${trapObj.label}」确实是个问题，我当时可能真没往那儿深想，主要是现场节奏有点赶。那按您的意思，这一部分我接下来具体该怎么补救或重新提问比较合适？`;
-        innerThought = "问题确实被点中了，但心里有点紧，还需要一点安全感和具体方法示范。";
-        note = `精准指出【${trapObj.category}】，若补充支持与方法示范效果会更好。`;
+        balance = hasSupport ? "balanced" : "superficial";
+        reply = `嗯……您刚提到的这一点我当时确实也有过一秒犹豫，但现场来访者情绪挺紧的，我怕顺着追问太细会让他们觉得被盘问或者影响关系，所以就先按原来说法带过了。您觉得这里最关键的问题在哪里呀，我怎么开口问才不会显得生硬？`;
+        innerThought = "老师刚点到这里，但我还不太确定如果不按我原来的方式处理，现场会不会失控。";
+        note = `受督处于初探阶段（未直接松口）：保持真实临床惯性，等待督导师给出具体机制解释或二轮跟进。`;
+        recRole = "teacher";
+      } else {
+        // 第2轮深入引导（或单轮即给出充分支持+具体临床线索）：真正解锁该陷阱
+        prevSpotted.add(candidateTrapId);
+
+        if (hasSupport) {
+          alliance = Math.min(95, alliance + 8);
+          stance = "open";
+          balance = "balanced";
+          reply = `听您把刚才那个逻辑和我的顾虑拆开讲完，我才真正意识到问题出在哪了——原来我一直拿“怕破坏关系”当挡箭牌，结果恰恰把「${trapObj.label}」这么核心的安全和证据链漏洞给绕过去了。如果按您刚刚提示的切入点，我下周打算先从核实具体事实和边界开始，不急着替他拍板。`;
+          innerThought = "被一步步拆解并接住顾虑后，我才真正听进去，不是光嘴上答应老师了。";
+          note = `支持与挑战平衡（深入引导生效）：真实解锁【${trapObj.category}】反思节点。`;
+        } else {
+          alliance = Math.max(48, alliance - 2);
+          stance = "defensive";
+          balance = "balanced";
+          reply = `好，顺着您刚才追问的这一步我大概明白「${trapObj.label}」的风险了。不过我心里还是有点打鼓，按我的经验现场很容易卡住，您能示范一两句具体可以怎么和来访者说吗？`;
+          innerThought = "逻辑上被说服了一半，但还是缺少具体操作抓手和安全感。";
+          note = `二轮追问击中【${trapObj.category}】，若补充支持与句式示范会更稳固。`;
+        }
+        recRole = trapObj.category === "叙事漂移" ? "counselor" : "consultant";
       }
-      recRole = trapObj.category === "叙事漂移" ? "counselor" : "consultant";
     }
 
     return {
@@ -235,6 +280,7 @@ ${telemetrySummary}
         stance,
         support_balance: balance,
         traps_spotted: Array.from(prevSpotted),
+        primed_traps: Array.from(primedSet),
         recommended_role: recRole,
         inner_thought: innerThought,
         next_pedagogical_note: note
@@ -243,16 +289,30 @@ ${telemetrySummary}
   },
 
   generateOfflineReport(caseData, messages, telemetryHistory) {
-    const last = telemetryHistory[telemetryHistory.length - 1] || { alliance_score: 70, traps_spotted: [] };
+    const last = telemetryHistory[telemetryHistory.length - 1] || { alliance_score: 65, traps_spotted: [] };
     const spottedSet = new Set(last.traps_spotted || []);
     const totalTraps = caseData.traps.length;
     const hitCount = spottedSet.size;
-    const trapScore = Math.round((hitCount / totalTraps) * 85 + 15);
+    const harshTurns = telemetryHistory.filter((t) => t.support_balance === "too_harsh").length;
+    const ruptureTurns = telemetryHistory.filter((t) => String(t.stance).includes("rupture")).length;
+    const repaired = ruptureTurns > 0 && !String(last.stance || "").includes("rupture") && (last.alliance_score || 0) >= 65;
+
+    const trapScore = Math.max(15, Math.round((hitCount / totalTraps) * 85 + (hitCount > 0 ? 15 : 0)) - (harshTurns > 0 && !repaired ? 15 : 0));
     const balancedTurns = telemetryHistory.filter((t) => t.support_balance === "balanced").length;
-    const balanceScore = telemetryHistory.length
+    let balanceScore = telemetryHistory.length
       ? Math.min(96, Math.round((balancedTurns / telemetryHistory.length) * 65 + 30))
-      : 65;
-    const allianceScore = last.alliance_score || 70;
+      : 55;
+    if (harshTurns > 0) {
+      balanceScore = Math.min(balanceScore, Math.max(15, 42 - harshTurns * 8 + (repaired ? 12 : 0)));
+    }
+    let allianceScore = last.alliance_score || 65;
+    if (ruptureTurns > 0 && !repaired) {
+      allianceScore = Math.min(allianceScore, 42);
+    }
+
+    const overallText = harshTurns > 0 && !repaired
+      ? `本次练习中督导师出现了 ${harshTurns} 次低支持高压力或评判式质疑，触发受督${ruptureTurns > 0 ? "同盟破裂（防御/退缩顺从）" : "防御"}且未能及时修复。尽管受督表面附和，但这属于羞愧退缩而非真实反思，反馈平衡度与同盟维护需重点改进。`
+      : `本次练习你共进行了 ${Math.floor(messages.length / 2)} 轮督导，识别并引导受督反思了 ${hitCount}/${totalTraps} 个核心评估陷阱。整体能关注受督的评估盲区，后续可进一步练习在“指出推理/伦理问题”前先建立Level 1安全肯定，并更主动探询受督的个人议题与反移情。`;
 
     return {
       scores: {
@@ -260,7 +320,7 @@ ${telemetrySummary}
         feedback_balance: balanceScore,
         alliance_and_role: allianceScore
       },
-      overall_summary: `本次练习你共进行了 ${Math.floor(messages.length / 2)} 轮督导，识别并引导受督反思了 ${hitCount}/${totalTraps} 个核心评估陷阱。整体能关注受督的评估盲区，后续可进一步练习在“指出推理/伦理问题”前先建立Level 1安全肯定，并更主动探询受督的个人议题与反移情。`,
+      overall_summary: overallText,
       trap_audit: caseData.traps.map((t) => ({
         trap_id: t.id,
         category: t.category,

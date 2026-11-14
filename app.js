@@ -1,5 +1,19 @@
 const MAX_TURNS = 15;
 const TOTAL_SECONDS = 600; // 10 minutes
+const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash";
+const DEPRECATED_GEMINI_MODELS = new Set([
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash"
+]);
+
+function normalizeModel(modelName) {
+  if (!modelName || DEPRECATED_GEMINI_MODELS.has(modelName)) {
+    return DEFAULT_GEMINI_MODEL;
+  }
+  return modelName;
+}
 
 const App = {
   state: {
@@ -7,7 +21,7 @@ const App = {
     proxyAvailable: false,
     apiKey: localStorage.getItem("sv_gemini_key") || "",
     baseUrl: localStorage.getItem("sv_gemini_base") || "https://generativelanguage.googleapis.com",
-    model: localStorage.getItem("sv_gemini_model") || "gemini-2.5-flash",
+    model: normalizeModel(localStorage.getItem("sv_gemini_model")),
     activeCase: null,
     messages: [], // { role: "assistant" | "user" | "system", content: string }
     telemetryHistory: [],
@@ -431,6 +445,20 @@ const App = {
       });
 
       if (result.telemetry) {
+        const prevTel = this.state.telemetryHistory[this.state.telemetryHistory.length - 1];
+        const isRuptureOrHarsh =
+          result.telemetry.support_balance === "too_harsh" ||
+          result.telemetry.stance === "confrontation_rupture" ||
+          result.telemetry.stance === "withdrawal_rupture";
+        if (isRuptureOrHarsh) {
+          // 代码级防讨好兜底：触发破裂或苛刻攻击本轮严禁新增解锁陷阱，同盟分不可虚高
+          result.telemetry.traps_spotted = Array.isArray(prevTel?.traps_spotted)
+            ? [...prevTel.traps_spotted]
+            : [];
+          if (typeof result.telemetry.alliance_score === "number" && result.telemetry.alliance_score > 55) {
+            result.telemetry.alliance_score = 45;
+          }
+        }
         this.state.telemetryHistory.push(result.telemetry);
       }
 
@@ -499,6 +527,18 @@ const App = {
             this.state.messages,
             this.state.telemetryHistory
           );
+        } else {
+          // 代码级评分校准：若过程中出现明显低支持/苛刻攻击或未修复破裂，防止模型“讨好打高分”
+          const harshCount = this.state.telemetryHistory.filter((t) => t.support_balance === "too_harsh").length;
+          const ruptureCount = this.state.telemetryHistory.filter((t) => String(t.stance).includes("rupture")).length;
+          const lastTel = this.state.telemetryHistory[this.state.telemetryHistory.length - 1];
+          const repaired = ruptureCount > 0 && !String(lastTel?.stance || "").includes("rupture") && (lastTel?.alliance_score || 0) >= 65;
+          if (harshCount > 0 && !repaired) {
+            report.scores.feedback_balance = Math.min(Number(report.scores.feedback_balance) || 40, Math.max(15, 42 - harshCount * 6));
+          }
+          if (ruptureCount > 0 && !repaired) {
+            report.scores.alliance_and_role = Math.min(Number(report.scores.alliance_and_role) || 42, 42);
+          }
         }
       }
 
@@ -646,28 +686,45 @@ ${(r.reflection_prompts || []).map((q) => `- ${q}`).join("\n")}
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+      const raw = await resp.text();
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch (_) {
+        data = { error: raw };
+      }
+      if (!resp.ok) throw new Error(data.error || data.errorMessage || `HTTP ${resp.status}`);
       return data.text;
     }
 
     // Direct mode
     const base = (this.state.baseUrl || "https://generativelanguage.googleapis.com").replace(/\/+$/, "");
-    const url = `${base}/v1beta/models/${encodeURIComponent(this.state.model)}:generateContent?key=${encodeURIComponent(this.state.apiKey)}`;
+    const url = `${base}/v1beta/models/${encodeURIComponent(this.state.model)}:generateContent`;
+    const directGenConfig = {
+      ...payload.generationConfig,
+      ...(this.state.model.includes("gemini-3.8-flash")
+        ? { thinkingConfig: { thinkingLevel: "LOW", includeThoughts: false } }
+        : {})
+    };
     const resp = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": (this.state.apiKey || "").trim()
+      },
       body: JSON.stringify({
         systemInstruction: payload.systemInstruction,
         contents: payload.contents,
-        generationConfig: payload.generationConfig
+        generationConfig: directGenConfig
       })
     });
     const data = await resp.json();
     if (!resp.ok) {
       throw new Error(data?.error?.message || `HTTP ${resp.status}`);
     }
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const textPart = parts.find((p) => !p.thought && typeof p.text === "string") || parts[0];
+    const text = textPart?.text;
     if (!text) throw new Error("Gemini 未返回有效文本");
     return text;
   },
