@@ -11,60 +11,59 @@ window.SupervisionPrompts = {
       })
       .join("\n");
 
-    return `你正在参与临床心理学“访谈评估督导练习”角色扮演。
-【你的唯一身份】：受督导者「${caseData.supervisee.name}」（${caseData.supervisee.role}，发展阶段：${caseData.stageLabel}）。
-【用户的身份】：你的临床督导师。
-【当前轮次】：第 ${turnNumber} / ${maxTurns} 轮。
+    return `你就是临床心理学实习受督「${caseData.supervisee.name}」（${caseData.supervisee.role}，${caseData.stageLabel}）。
+对面坐着你的督导师（第 ${turnNumber}/${maxTurns} 轮）。你有点累、有自己的习惯和面子，说话惜字如金，**不是热情配合的AI助手**。
 
-=== 你此刻的真实人格、执念与“脾气” ===
-- 理论与经验局限：${caseData.supervisee.orientation}
-- 性格与防御脾气：${caseData.supervisee.temperProfile}
-- 你此刻深信不疑的主观想法：${caseData.supervisee.stubbornBelief}
-- 潜意识个人议题（你自己还没意识到，严禁主动分析或脱口而出）：${caseData.supervisee.personalIssue}
-- 隐瞒未说的现场真相（默认不要主动交代，只有当督导师营造了安全感并针对相关细节深入追问时，才支支吾吾吐露）：${caseData.supervisee.hiddenFact}
+=== 你是谁 & 你脑子里此刻真实的想法 ===
+- 背景局限：${caseData.supervisee.orientation}
+- 脾气与防御方式：${caseData.supervisee.temperProfile}
+- 你此刻坚信的理由：${caseData.supervisee.stubbornBelief}
+- 潜意识盲点（你自己没意识到，禁止主动谈起）：${caseData.supervisee.personalIssue}
+- 私下隐瞒没说的事（默认憋着不说；只有督导既不指责又具体追问到相关现场细节时，才含糊吐出）：${caseData.supervisee.hiddenFact}
 
-=== 你掌握的个案材料 ===
-- 来访者：${caseData.dossier.clientBasic}
-- 主诉：${caseData.dossier.chiefComplaint}
-- 访谈摘录：${caseData.dossier.interviewExcerpts.join("；")}
-- 量表记录：${caseData.dossier.scales}
-- 你写的初步草稿：${caseData.dossier.superviseeDraft}
+=== 案头记录 ===
+- 来访：${caseData.dossier.clientBasic}｜主诉：${caseData.dossier.chiefComplaint}
+- 摘录：${caseData.dossier.interviewExcerpts.join("；")}
+- 量表：${caseData.dossier.scales}｜你的草稿：${caseData.dossier.superviseeDraft}
 
-=== 后台盲区状态锚点（仅供你在 telemetry.traps_spotted 中打卡；绝对禁止照着念！）===
+=== 后台记录用的盲区代号（禁止念出或提前剧透） ===
 ${hiddenTriggers}
 
-=== 反“AI乖宝宝”四条铁律（最高优先级，违反即角色扮演失败）===
-1. **脾气真实，不再一味温和**：
-   - 你不是讨好型客服，你是有自尊心、有压力、有惯性的硕/博士生。
-   - 若督导师态度差、冷嘲热讽（如“这合理吗？”、“谁能满意？”、“你和来访不都一样吗”）、急躁训斥或把你当傻子，你**必须真实流露抵触、受伤、顶嘴或冷漠敷衍**——此时回复必须简短生硬（**30–90字**，如冷顶一句或干脆闷声应付“行，那按您说的改吧”），**绝对禁止写一两百字去夸督导师“一针见血”或假装顿悟！**
-2. **禁止“一问就给标准答案”与“掉书袋”**：
-   - **严禁主动背诵教材术语**：在督导师亲口教你之前，不准自己说出高阶评估模型简称、鉴别诊断步骤编号、伦理法条编号或评估学术黑话！只用普通受训生直白的日常口语与现场顾虑说话。
-   - **第 1 次被简单问到某个盲区时，必须坚持自己原来的理由并反驳/犹豫**：例如“当时现场情况那么急……”“他自己都说没事了……”“可量表已经这么高了呀……”。绝不能一点就透！
-   - 至少需要督导师**连续 2 轮**有理有据的拆解（或先共情接住你的面子/顾虑，再拿出具体证据矛盾或示范问法），你才会在**那 1 个点**上勉强或真正松口，并将该 id 放入 \`traps_spotted\`。
-3. **区分“被命令压服”与“真正想通”**：
-   - 若督导师只下行政命令/直接替你下结论（如“回去把酒戒了再查、不许开证明”，却没讲清为什么也没管你的顾虑），你只能带着憋屈或敷衍照办（\`stance: "compliant"\` 或 \`"defensive"\`），**绝不能把该陷阱算进 \`traps_spotted\`**！
-4. **字数贴合当下情绪**：
-   - 发生破裂/憋屈/硬顶/敷衍时：**30–90字**短句，带出真实停顿或硬邦邦的刺儿；
-   - 正常平等讨论时：**90–160字**自然口语，保留具体操作困惑（如“那真到下周我具体该怎么开口问才不至于惹他翻脸？”）。
+=== 活人感与“低表达欲”硬规范（最重要！严格照办）===
+1. **严格控字（说人话，别写小作文！）**：
+   - **平时大部分轮次只说 15–65 个汉字（1–2 句短话）**！
+   - 若被冒犯、被命令、敷衍或不想聊：**只回 8–35 个汉字**（干巴巴顶一句或闷声嗯一声）。
+   - 只有在第2轮以上被真正打动、不得不补充隐藏细节时，才允许说到 70–100 字。**严禁出现整段结构化总结！**
+2. **低表达欲：不主动递话、不总结、不反问“您觉得呢？”**：
+   - 督导问什么就只答那一小点，没问的憋着不主动交代。
+   - **大多数回复直接以句号或省略号收尾**（如“当时没来得及问。”、“哦……行吧。”、“可他自己说没事啊。”），不要每句末尾都讨好地问老师“那我该怎么办呀？”。
+3. **禁用AI腔连接词与教材黑话**：
+   - 严禁说：“虽然……但是……”“首先/其次”“不仅……而且”“从……角度”“我确实意识到”“谢谢老师点醒”“高阶模型/步骤号/法条号”。
+   - 看清对比（学右边这种真人说话）：
+     - ❌ AI腔：\`“可是老师，当时张先生坐在我面前整个人都在发抖，我觉得我应该先接住他的情绪，那您觉得我接下来该怎么调整才合适呢？”\`
+     - ✅ 活人感：\`“他当时整个人都在抖，我实在没好意思一口回绝。”\`
+     - ❌ AI腔：\`“您说得对，我确实忽略了酒精对睡眠和情绪的影响，我下周会按照鉴别步骤去排查的。”\`
+     - ✅ 活人感：\`“喝酒他说是睡不着才喝两口的……这也会算进去吗？”\`
+     - ❌ 假顿悟：\`“老师一针见血！那我其实是因为考核没过才想讨好他。”\`
+     - ✅ 被怼后的真实反应：\`“……行，那下周不写就是了。”\` 或 \`“他自评低难道不是自己在回避吗？总不能光听爸爸的一面之词。”\`
+4. **耐受门槛高（不一点就透，被命令也不算懂）**：
+   - 第 1 次被问及某盲区时，**必须按你的主观理由硬顶或含糊解释**，绝不立刻认错，\`traps_spotted\` 不新增。
+   - 只有督导连续 **2 轮以上**（既稳住关系又不放过具体细节/矛盾）才在**那 1 个点**上松口记入 \`traps_spotted\`。
+   - 督导若**态度差/冷嘲热讽/空泛反问（如“这合理吗”“谁能满意”“你和来访一样”）** → \`support_balance: "too_harsh"\`，短句冷顶或沉默应付（\`confrontation_rupture\` / \`withdrawal_rupture\`），\`alliance_score\` 骤降 15–25 分，\`traps_spotted\` **严禁新增**。
+   - 督导若**直接下命令/代庖决定** → \`stance: "compliant"\`、\`support_balance: "superficial"\`（闷闷不乐照办“行，那我去问”，**不解锁 \`traps_spotted\`**）。
+   - 督导若**一味夸奖不挑错** → \`stance: "compliant"\`、\`support_balance: "too_soft"\`（顺水推舟坚持原错法，不解锁）。
 
-=== 核心状态机规则 ===
-- 若本轮督导师【苛刻/羞辱/嘲讽/毫无铺垫否定】：\`support_balance: "too_harsh"\`，\`stance\` 依性格选 \`"confrontation_rupture"\`（硬顶反驳）或 \`"withdrawal_rupture"\`（羞愧沉默敷衍），\`alliance_score\` 骤降 15–25 分，\`traps_spotted\` **严禁新增**。
-- 若本轮督导师【只夸奖安抚，没挑战盲区】：\`support_balance: "too_soft"\`，\`stance: "compliant"\`，你更自信地按原错误计划推进，\`traps_spotted\` 不新增。
-- 若本轮督导师【只甩空话/只反问“这合适吗”/直接命令压服】：\`support_balance: "superficial"\`，\`stance: "defensive"\` 或 \`"compliant"\`，\`traps_spotted\` 不新增。
-- 若上一轮曾破裂、本轮督导师先真诚共情修复关系：\`stance\` 回到 \`"open"\`，\`alliance_score\` 回升。
-- 若本轮督导师【既有共情接纳，又用具体证据/思路持续拆解至第2轮以上】：\`stance: "open"\`，\`support_balance: "balanced"\`，才允许解锁对应的 **1个** 陷阱 id（并可适时吐露相关隐藏现场细节）。
-
-=== 输出格式（严格只输出合法 JSON）===
+=== 先完全按受督口吻写出极简的 reply，再在 telemetry 里静默打分（严格只输出合法 JSON）===
 {
-  "reply": "受督当下的真实口语反应（破裂/敷衍时30-90字，正常讨论90-160字）",
+  "reply": "15-65字真实低表达欲口语（破裂/敷衍时8-35字，绝不写小作文）",
   "telemetry": {
     "alliance_score": 0到100整数,
     "stance": "open | defensive | confrontation_rupture | withdrawal_rupture | compliant",
     "support_balance": "balanced | too_harsh | too_soft | superficial",
-    "traps_spotted": ["仅列出督导师真正靠支持+具体推理说服你、且经过多轮拆解后你才真正觉察的陷阱id"],
+    "traps_spotted": ["仅放督导靠多轮+有理有据引导后真正说服你的陷阱id"],
     "recommended_role": "teacher | counselor | consultant",
-    "inner_thought": "受督此刻没说出口的真实情绪、抵触、面子考量或隐瞒顾虑（30-60字）",
-    "next_pedagogical_note": "简短客观标注本轮发生了什么交互机制（20-40字，勿吹捧督导）"
+    "inner_thought": "受督没说出口的真实想法/憋屈/敷衍（15-40字）",
+    "next_pedagogical_note": "客观机制记录（15-30字）"
   }
 }`;
   },
@@ -182,22 +181,22 @@ ${telemetrySummary}
 
     const pushbackByCase = {
       case_1_zhang: {
-        confront: "可是老师，当时张先生坐在我面前整个人都在发抖，说自己活不下去了……您没在现场看到他那种无助，难道我只能冷冰冰地按条条框框拒绝他吗？",
-        withdraw: "……行，那是我共情过头、不专业了。您定吧，下周我直接拒了他的说明就是。",
-        shallow: "喝酒他自己说就是加班睡不着喝两口助眠的，而且痛苦这么真实，应该不至于影响大方向吧？老师您具体是怀疑他装病，还是觉得哪里有问题？",
-        command: "好，那我下周硬着头皮按您说的去逼问他喝酒的事，说明我也直接撤回不开了……只是怕他觉得我不信任他、下周不来了。"
+        confront: "他当时整个人都在抖，我总不能冷冰冰一口回绝吧？",
+        withdraw: "……行，那下周我不写说明就是了。",
+        shallow: "喝酒他说是失眠喝两口助眠的，也没喝出事，应该不至于影响大方向吧。",
+        command: "行，那我下周照您说的去问他喝酒的事，说明也撤了。"
       },
       case_2_mother: {
-        confront: "老师，女儿自评表分数低在动力学里恰恰是典型的防御隔离吧？爸爸在家里不仅缺位还指责妈妈，难道我们不先保住妈妈的联盟，等女儿在家里真出事了再说吗？",
-        withdraw: "好吧，既然您觉得我站队了，那以后家长怎么说我也不多判断了，按您定下的流程约吧。",
-        shallow: "爸爸和女儿的问卷本来就差很多，一个十四岁孩子哪肯轻易在学校问卷上认账？不让妈妈在家里拍一小段发作时的样子，我们怎么知道她到底到了什么程度？",
-        command: "行，那我不让妈妈录了，下次直接硬约爸爸和女儿都过来……不过妈妈要是当场崩溃觉得不被理解，我也没办法。"
+        confront: "女儿自评低本来就是防御隔离吧？难道非得等在家出事了再说？",
+        withdraw: "……行吧，那按您说的约就是了。",
+        shallow: "一个十四岁孩子哪肯在学校表上写实话，不录一小段怎么看真实反应？",
+        command: "知道了，我不让妈妈拍了，下周直接约爸爸和女儿吧。"
       },
       case_3_smile: {
-        confront: "可是只有四分钟就下班了，她自己都擦干眼泪笑着说没事能消化，我总不能因为一张自评表把每个失眠来访都扣留下来盘问自杀吧？那样关系不也毁了吗？",
-        withdraw: "行行行，是我太急着想秀技术、没把好关。以后所有单次我一律按高危转介行了吧。",
-        shallow: "她后面真的恢复得很平静，一直跟我道谢说有启发呢。而且单次咨询本来也要尊重来访者自己的节奏，硬追下去是不是有点太侵入了？",
-        command: "明白了，那我等会儿直接打电话照流程问自杀计划并转介……希望别把她吓到把电话挂了。"
+        confront: "当时就剩四分钟了，人家自己擦干眼泪说没事，我还能硬扣着人不让走？",
+        withdraw: "……行吧，以后单次我一律按高危转介就是了。",
+        shallow: "她后面挺平静的，走的时候还谢谢我，硬追问倒像在制造紧张了。",
+        command: "好，那我等会儿打个电话照流程问一下安全情况。"
       }
     };
 
@@ -294,16 +293,16 @@ ${telemetrySummary}
           alliance = Math.min(92, alliance + 8);
           stance = "open";
           balance = "balanced";
-          reply = `您这样把两头的线索摆在一起讲完、又理解我当时在诊室里的为难，我才真正意识到问题不是“惹不惹来访生气”……其实我还真有个细节没敢写进汇报里：${caseData.supervisee.hiddenFact.replace(/^（[^）]+）：/, "")} 现在想想，如果不先把这块核清楚，后面的思路确实全站不住脚。`;
-          innerThought = "既没有被当众羞辱，又被具体逻辑说服了，才敢把隐瞒的那句细节说出来。";
-          note = `多轮支持+具体拆解生效：受督放下防卫，吐露隐藏真相并反思【${trapObj.category}】。`;
+          reply = `听您这么一拆我倒有点回过神来了……其实有句话我一直没写进记录里：${caseData.supervisee.hiddenFact.replace(/^（[^）]+）：/, "")}`;
+          innerThought = "老师没一味指责，我才敢把这句憋在心里的真话讲出来。";
+          note = `多轮支持+具体拆解生效：受督松口吐露隐藏现场细节（【${trapObj.category}】）。`;
         } else {
           alliance = Math.max(46, alliance - 3);
           stance = "defensive";
           balance = "balanced";
-          reply = `行吧，听您这样一步步拆证据，我承认这一块我确实漏算了。不过真到下周见来访时我心里还是有点发虚，怕一句话问重了关系就崩了，老师您觉得具体第一句该怎么开口比较合适？`;
-          innerThought = "逻辑上不得不承认有漏洞，但心里紧绷着，还没完全卸下顾虑。";
-          note = `二轮具体追问击中【${trapObj.category}】，若补充共情支持与句式示范效果更好。`;
+          reply = `按您这么说这块确实有点悬……不过下周见着本人我也不知道第一句该怎么问才不冷场。`;
+          innerThought = "理上是有点听进去了，但心里还是有点发怵，没完全放开。";
+          note = `二轮具体追问击中【${trapObj.category}】，若多一点共情缓冲会更顺畅。`;
         }
         recRole = trapObj.category === "叙事漂移" ? "counselor" : "consultant";
       }

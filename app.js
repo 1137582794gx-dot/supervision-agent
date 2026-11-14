@@ -732,7 +732,7 @@ ${(r.reflection_prompts || []).map((q) => `- ${q}`).join("\n")}
       systemInstruction: { parts: [{ text: systemInstruction }] },
       contents,
       generationConfig: {
-        temperature: skipJsonHint ? 0.35 : 0.7,
+        temperature: skipJsonHint ? 0.25 : 0.85,
         responseMimeType: "application/json"
       }
     };
