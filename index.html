@@ -90,11 +90,11 @@
       <div id="chatMessages" class="chat-messages"></div>
 
       <div class="scaffold-bar" id="scaffoldBar">
-        <span class="scaffold-label">督导切入点参考：</span>
+        <span class="scaffold-label">卡壳提示（默认折叠防剧透）：</span>
       </div>
 
       <div class="composer">
-        <textarea id="userInput" placeholder="输入你的督导回应（建议兼顾共情支持与具体非评判提问；Enter 发送，Shift+Enter 换行）"></textarea>
+        <textarea id="userInput" placeholder="输入你作为督导师的回应（Enter 发送，Shift+Enter 换行）"></textarea>
         <button id="sendBtn" class="send-btn" onclick="App.sendMessage()">发送</button>
       </div>
     </section>
@@ -121,7 +121,7 @@
         <div id="directFields" style="display:none;">
           <div class="form-group">
             <label>Gemini API Key</label>
-            <input type="password" id="settingApiKey" placeholder="AIza..." />
+            <input type="password" id="settingApiKey" placeholder="AQ... 或 AIza..." />
             <div class="form-hint">仅保存在你当前浏览器的本地存储（localStorage），不会上传到其他第三方。</div>
           </div>
           <div class="form-group">
@@ -133,9 +133,9 @@
         <div class="form-group">
           <label>Gemini 模型版本</label>
           <select id="settingModel">
-            <option value="gemini-2.5-flash">gemini-2.5-flash（推荐：响应快、适合15轮实时对话）</option>
-            <option value="gemini-2.5-pro">gemini-2.5-pro（更深临床推理，响应略慢）</option>
-            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash（推荐：自动兜底备选模型）</option>
+            <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite（极速高并发、适合课堂10组同时使用）</option>
+            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview（更深临床推理，响应略慢）</option>
           </select>
         </div>
       </div>

@@ -30,6 +30,8 @@ const App = {
     timerId: null,
     isSending: false,
     revealTelemetry: false,
+    showScaffolds: false,
+    usedScaffolds: 0,
     lastReport: null
   },
 
@@ -132,6 +134,8 @@ const App = {
     this.state.turnCount = 0;
     this.state.remainingSeconds = TOTAL_SECONDS;
     this.state.revealTelemetry = false;
+    this.state.showScaffolds = false;
+    this.state.usedScaffolds = 0;
     this.state.lastReport = null;
 
     document.getElementById("lobbyView").style.display = "none";
@@ -340,16 +344,30 @@ const App = {
   renderScaffolds() {
     const bar = document.getElementById("scaffoldBar");
     const c = this.state.activeCase;
-    bar.innerHTML = `<span class="scaffold-label">参考切入点：</span>` +
+    if (!this.state.showScaffolds) {
+      bar.innerHTML = `
+        <span class="scaffold-label">自主督导练习中：</span>
+        <button class="chip-btn" onclick="App.toggleScaffolds()">💡 卡壳了？展开提示锦囊（${c.scaffolds.length}条 · 将记入复盘）</button>
+      `;
+      return;
+    }
+    bar.innerHTML = `<span class="scaffold-label">参考切入点（已记入辅助次数）：</span>` +
       c.scaffolds.map((s, idx) => {
         const short = s.match(/^（([^）]+)）/)?.[1] || `思路 ${idx + 1}`;
         return `<button class="chip-btn" title="${this.escapeHtml(s)}" onclick="App.fillScaffold(${idx})">${short}</button>`;
-      }).join("");
+      }).join("") +
+      `<button class="chip-btn" style="margin-left:auto;" onclick="App.toggleScaffolds()">收起</button>`;
+  },
+
+  toggleScaffolds() {
+    this.state.showScaffolds = !this.state.showScaffolds;
+    this.renderScaffolds();
   },
 
   fillScaffold(idx) {
     const text = this.state.activeCase.scaffolds[idx];
     const clean = text.replace(/^（[^）]+）\s*/, "");
+    this.state.usedScaffolds += 1;
     const input = document.getElementById("userInput");
     input.value = clean;
     input.focus();
@@ -450,13 +468,18 @@ const App = {
           result.telemetry.support_balance === "too_harsh" ||
           result.telemetry.stance === "confrontation_rupture" ||
           result.telemetry.stance === "withdrawal_rupture";
-        if (isRuptureOrHarsh) {
-          // 代码级防讨好兜底：触发破裂或苛刻攻击本轮严禁新增解锁陷阱，同盟分不可虚高
+        const isSuperficialOrCompliant =
+          result.telemetry.support_balance === "superficial" ||
+          result.telemetry.support_balance === "too_soft" ||
+          result.telemetry.stance === "compliant" ||
+          text.length <= 12;
+        if (isRuptureOrHarsh || isSuperficialOrCompliant) {
+          // 代码级防讨好/防秒通兜底：破裂、苛刻攻击、命令压服、敷衍夸奖或<=12字短句均不得解锁新陷阱
           result.telemetry.traps_spotted = Array.isArray(prevTel?.traps_spotted)
             ? [...prevTel.traps_spotted]
             : [];
-          if (typeof result.telemetry.alliance_score === "number" && result.telemetry.alliance_score > 55) {
-            result.telemetry.alliance_score = 45;
+          if (isRuptureOrHarsh && typeof result.telemetry.alliance_score === "number" && result.telemetry.alliance_score > 50) {
+            result.telemetry.alliance_score = 42;
           }
         }
         this.state.telemetryHistory.push(result.telemetry);
@@ -489,6 +512,29 @@ const App = {
     }
   },
 
+  computeSessionMetrics() {
+    const userMsgs = this.state.messages.filter((m) => m.role === "user");
+    const totalChars = userMsgs.reduce((acc, m) => acc + (m.content || "").trim().length, 0);
+    const avgUserChars = userMsgs.length ? Math.round(totalChars / userMsgs.length) : 0;
+    const tel = this.state.telemetryHistory;
+    const harshCount = tel.filter((t) => t.support_balance === "too_harsh").length;
+    const ruptureCount = tel.filter((t) => String(t.stance).includes("rupture")).length;
+    const compliantOnlyTurns = tel.filter((t) => t.stance === "compliant").length;
+    const balancedTurns = tel.filter((t) => t.support_balance === "balanced").length;
+    const lastTel = tel[tel.length - 1];
+    const repaired = ruptureCount > 0 && !String(lastTel?.stance || "").includes("rupture") && (lastTel?.alliance_score || 0) >= 65;
+    return {
+      turnCount: this.state.turnCount,
+      avgUserChars,
+      usedScaffolds: this.state.usedScaffolds,
+      harshCount,
+      ruptureCount,
+      compliantOnlyTurns,
+      balancedTurns,
+      repaired
+    };
+  },
+
   async finishAndEvaluate() {
     if (this.state.turnCount === 0) {
       alert("请先与受督进行至少 1 轮对话后再生成复盘报告。");
@@ -502,6 +548,8 @@ const App = {
     </div>`;
     document.getElementById("reportModal").classList.add("active");
 
+    const sessionMetrics = this.computeSessionMetrics();
+
     try {
       let report;
       if (this.state.mode === "offline") {
@@ -509,35 +557,43 @@ const App = {
         report = window.SupervisionPrompts.generateOfflineReport(
           this.state.activeCase,
           this.state.messages,
-          this.state.telemetryHistory
+          this.state.telemetryHistory,
+          sessionMetrics
         );
       } else {
         const evalPrompt = window.SupervisionPrompts.buildEvaluationReportPrompt(
           this.state.activeCase,
           this.state.messages,
-          this.state.telemetryHistory
+          this.state.telemetryHistory,
+          sessionMetrics
         );
         const raw = await this.callGemini(evalPrompt, [
-          { role: "user", content: "请基于以上对话逐字稿与遥测记录，输出JSON格式复盘报告。" }
+          { role: "user", content: "请严格执行反讨好评分规则，基于以上逐字稿与客观过程指标输出JSON格式复盘报告。" }
         ], true);
         report = this.parseJsonSafe(raw, null);
         if (!report || !report.scores) {
           report = window.SupervisionPrompts.generateOfflineReport(
             this.state.activeCase,
             this.state.messages,
-            this.state.telemetryHistory
+            this.state.telemetryHistory,
+            sessionMetrics
           );
         } else {
-          // 代码级评分校准：若过程中出现明显低支持/苛刻攻击或未修复破裂，防止模型“讨好打高分”
-          const harshCount = this.state.telemetryHistory.filter((t) => t.support_balance === "too_harsh").length;
-          const ruptureCount = this.state.telemetryHistory.filter((t) => String(t.stance).includes("rupture")).length;
-          const lastTel = this.state.telemetryHistory[this.state.telemetryHistory.length - 1];
-          const repaired = ruptureCount > 0 && !String(lastTel?.stance || "").includes("rupture") && (lastTel?.alliance_score || 0) >= 65;
-          if (harshCount > 0 && !repaired) {
-            report.scores.feedback_balance = Math.min(Number(report.scores.feedback_balance) || 40, Math.max(15, 42 - harshCount * 6));
+          // 代码级评分校准：防模型讨好，覆盖羞辱破裂、过短敷衍、纯命令压服三类失真情况
+          if (sessionMetrics.harshCount > 0 && !sessionMetrics.repaired) {
+            report.scores.trap_detection = Math.min(Number(report.scores.trap_detection) || 45, 45);
+            report.scores.feedback_balance = Math.min(Number(report.scores.feedback_balance) || 35, Math.max(12, 35 - sessionMetrics.harshCount * 6));
           }
-          if (ruptureCount > 0 && !repaired) {
-            report.scores.alliance_and_role = Math.min(Number(report.scores.alliance_and_role) || 42, 42);
+          if (sessionMetrics.ruptureCount > 0 && !sessionMetrics.repaired) {
+            report.scores.alliance_and_role = Math.min(Number(report.scores.alliance_and_role) || 40, 40);
+          }
+          if (sessionMetrics.turnCount <= 2 || sessionMetrics.avgUserChars < 12) {
+            report.scores.trap_detection = Math.min(Number(report.scores.trap_detection) || 45, 45);
+            report.scores.feedback_balance = Math.min(Number(report.scores.feedback_balance) || 48, 48);
+          }
+          if (sessionMetrics.compliantOnlyTurns > 0 && sessionMetrics.balancedTurns === 0) {
+            report.scores.feedback_balance = Math.min(Number(report.scores.feedback_balance) || 58, 58);
+            report.scores.alliance_and_role = Math.min(Number(report.scores.alliance_and_role) || 60, 60);
           }
         }
       }
@@ -548,7 +604,8 @@ const App = {
       const fallback = window.SupervisionPrompts.generateOfflineReport(
         this.state.activeCase,
         this.state.messages,
-        this.state.telemetryHistory
+        this.state.telemetryHistory,
+        sessionMetrics
       );
       this.state.lastReport = fallback;
       this.renderReport(fallback, `（注：在线复盘请求异常 [${err.message}]，已自动切换本地评估引擎生成报告）`);
