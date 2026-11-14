@@ -13,7 +13,7 @@ export default async (req) => {
     });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "Netlify 环境变量尚未配置 GEMINI_API_KEY" }), {
       status: 500,
@@ -25,11 +25,14 @@ export default async (req) => {
     const body = await req.json();
     const model = body.model || process.env.GEMINI_MODEL || "gemini-2.5-flash";
     const baseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/+$/, "");
-    const url = `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const url = `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
     const upstream = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
       body: JSON.stringify({
         systemInstruction: body.systemInstruction,
         contents: body.contents || [],
