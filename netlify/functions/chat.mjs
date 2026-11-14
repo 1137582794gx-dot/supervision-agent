@@ -23,7 +23,14 @@ export default async (req) => {
 
   try {
     const body = await req.json();
-    const model = body.model || process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const deprecatedModels = new Set([
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash"
+    ]);
+    const requestedModel = deprecatedModels.has(body.model) ? "" : body.model;
+    const model = process.env.GEMINI_MODEL || requestedModel || "gemini-3.8-flash";
     const baseUrl = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/+$/, "");
     const url = `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
